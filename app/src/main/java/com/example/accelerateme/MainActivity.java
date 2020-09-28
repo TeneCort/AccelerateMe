@@ -3,7 +3,6 @@ package com.example.accelerateme;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
@@ -26,9 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +32,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.graphics.Color.RED;
 import static android.graphics.Color.WHITE;
 
@@ -71,54 +69,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         mLayout.setKeepScreenOn(true);
 
-        /*try {
-            FileOutputStream fOut = openFileOutput("test",Context.MODE_PRIVATE);
-            String str = "test data";
-            fOut.write(str.getBytes());
-            fOut.close();
-
-            System.out.println("Yay");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        FileInputStream fin = null;
-        try {
-            fin = openFileInput("test");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        int c = 0;
-        String temp="";
-
-        while(true){
-            try {
-                if (!((c = fin.read()) != -1)) break;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            temp = temp + Character.toString((char)c);
-        }
-
-        System.out.println(temp);
-
-        try {
-            fin.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 isActive = !isActive;
                 if (isActive){
                     mButton.setText("Stop Reading");
-                    writeToFile("test");
-                    System.out.println(getApplicationContext());
                 }else{
                     mButton.setText("Start Reading");
                 }
@@ -128,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+
     private void writeToFile(String content) {
 
         Date currentTime = Calendar.getInstance().getTime();
@@ -137,9 +93,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isStoragePermissionGranted())
         {
             try {
-                File file = new File(Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOWNLOADS + "/test.txt");
-                //System.out.println(Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOWNLOADS);
-                
+                File file = new File( Environment.getExternalStorageDirectory() + "/Download/test.csv");
+
                 if (!file.exists()) {
                     file.createNewFile();
                 }
@@ -182,8 +137,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if ((accelerationX> threshold || accelerationY > threshold || accelerationZ > threshold) && isActive == true && isCountDown == false){
 
-            /*Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));*/
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
             isCountDown = true;
             changeText();
             writeValues();
@@ -201,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 @Override
                 public void onFinish() {
                     isCountDown = false;
+                    writeToFile(values.toString());
                     System.out.println(values);
                 }
             }.start();
@@ -232,7 +188,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 return true;
             } else {
                 Log.v(TAG, "Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, SYSTEM_ALERT_WINDOW, READ_EXTERNAL_STORAGE
+                }, 1);
                 return false;
             }
         }
