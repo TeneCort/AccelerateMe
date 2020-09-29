@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -51,8 +52,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float accelerationY;
     float accelerationX;
     float accelerationZ;
-
-    List<String> values = new ArrayList<>();
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -80,12 +79,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         });
-
-
     }
 
 
-    private void writeToFile(String content) {
+    private void writeToFile(List content, String readingCase) {
 
         Date currentTime = Calendar.getInstance().getTime();
         String strDate = currentTime.toString();
@@ -93,14 +90,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isStoragePermissionGranted())
         {
             try {
-                File file = new File( Environment.getExternalStorageDirectory() + "/Download/test.csv");
+                File file = new File( Environment.getExternalStorageDirectory() + "/Download/" + readingCase + " " + strDate + ".csv");
 
                 if (!file.exists()) {
                     file.createNewFile();
                 }
 
                 FileWriter writer = new FileWriter(file);
-                writer.append(strDate).append(" : ").append(content);
+
+                Iterator<String> contentIterator = content.iterator();
+
+                writer.append("X, Y, Z");
+
+                while(contentIterator.hasNext())
+                {
+                    writer.append("\n\r");
+                    writer.append(contentIterator.next());
+                }
+
                 writer.flush();
                 writer.close();
 
@@ -147,16 +154,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     protected void writeValues(){
         if (isCountDown){
+
+            final String readCase = (isActive) ? "TRUE FALL" : "FALSE FALL";
+
+            final List<String> values = new ArrayList<>();
+
             new CountDownTimer(5000, 100) {
                 @Override
                 public void onTick(long l) {
-                    values.add("X : " + accelerationX + " Y : " + accelerationY + " Z : " + accelerationZ );
+                    values.add(accelerationX + ", " + accelerationY + ", " + accelerationZ);
                 }
 
                 @Override
                 public void onFinish() {
                     isCountDown = false;
-                    writeToFile(values.toString());
+                    writeToFile(values, readCase);
                     System.out.println(values);
                 }
             }.start();
