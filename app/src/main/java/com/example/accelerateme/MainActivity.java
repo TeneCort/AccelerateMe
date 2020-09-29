@@ -103,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         });
+
+        isStoragePermissionGranted();
     }
 
     private void writeToFile(List content, String readingCase) {
@@ -110,33 +112,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Date currentTime = Calendar.getInstance().getTime();
         String strDate = currentTime.toString();
 
-        if (isStoragePermissionGranted())
-        {
-            try {
-                File file = new File( Environment.getExternalStorageDirectory() + "/Download/" + readingCase + " " + strDate + ".csv");
+        try {
+            File file = new File( Environment.getExternalStorageDirectory() + "/Download/" + readingCase + " " + strDate + ".csv");
 
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-
-                FileWriter writer = new FileWriter(file);
-
-                Iterator<String> contentIterator = content.iterator();
-
-                writer.append("X, Y, Z");
-
-                while(contentIterator.hasNext())
-                {
-                    writer.append("\n\r");
-                    writer.append(contentIterator.next());
-                }
-
-                writer.flush();
-                writer.close();
-
-            } catch (IOException e) {
-                System.out.println(e);
+            if (!file.exists()) {
+                file.createNewFile();
             }
+
+            FileWriter writer = new FileWriter(file);
+
+            Iterator<String> contentIterator = content.iterator();
+
+            writer.append("X, Y, Z");
+
+            while(contentIterator.hasNext())
+            {
+                writer.append("\n\r");
+                writer.append(contentIterator.next());
+            }
+
+            writer.flush();
+            writer.close();
+
+        } catch (IOException e) {
+            System.out.println(e);
         }
     }
 
