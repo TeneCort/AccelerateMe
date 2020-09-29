@@ -1,5 +1,6 @@
 package com.example.accelerateme;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -39,15 +40,19 @@ import static android.graphics.Color.RED;
 import static android.graphics.Color.WHITE;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    static final String BUTTON_TRUE_IS_ACTIVE = "buttonState";
+    static final String BUTTON_FALSE_IS_ACTIVE = "buttonState";
 
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
 
     private TextView mInfoText;
-    private Button mButton;
+    private Button mTrueButton;
+    private Button mFalseButton;
 
-    private boolean isActive = false;
-    private  boolean isCountDown = false;
+    private boolean isTrueActive = false;
+    private boolean isFalseActive = false;
+    private boolean isCountDown = false;
 
     float accelerationY;
     float accelerationX;
@@ -56,31 +61,49 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         mInfoText = findViewById(R.id.activity_main_info_txt);
         LinearLayout mLayout = findViewById(R.id.activity_main_layout);
-        mButton = findViewById(R.id.activity_main_btn);
+        mTrueButton = findViewById(R.id.activity_main_true_btn);
+        mFalseButton = findViewById(R.id.activity_main_false_btn);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
         mLayout.setKeepScreenOn(true);
 
-        mButton.setOnClickListener(new View.OnClickListener() {
+        mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                isActive = !isActive;
-                if (isActive){
-                    mButton.setText("Stop Reading");
+                isTrueActive = !isTrueActive;
+                if (isTrueActive){
+                    mFalseButton.setEnabled(false);
+                    mTrueButton.setText("Stop Reading");
                 }else{
-                    mButton.setText("Start Reading");
+                    mTrueButton.setText("Start reading true Fall");
+                    mFalseButton.setEnabled(true);
+                }
+            }
+        });
+
+        mFalseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isFalseActive = !isFalseActive;
+                if (isFalseActive){
+                    mFalseButton.setText("Stop Reading");
+                    mTrueButton.setEnabled(false);
+                }else{
+                    mFalseButton.setText("Start reading false Fall");
+                    mTrueButton.setEnabled(true);
                 }
             }
         });
     }
-
 
     private void writeToFile(List content, String readingCase) {
 
@@ -118,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void changeText(){
+
         mInfoText.setText("Mamie est tombé!");
         mInfoText.setBackgroundColor(RED);
 
@@ -142,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         int threshold = 15;
 
-        if ((accelerationX> threshold || accelerationY > threshold || accelerationZ > threshold) && isActive == true && isCountDown == false){
+        if ((accelerationX> threshold || accelerationY > threshold || accelerationZ > threshold) && (isTrueActive || isFalseActive) && isCountDown == false){
 
             Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
@@ -153,9 +177,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     protected void writeValues(){
+
         if (isCountDown){
 
-            final String readCase = (isActive) ? "TRUE FALL" : "FALSE FALL";
+            final String readCase = (isTrueActive) ? "TRUE FALL" : "FALSE FALL";
 
             final List<String> values = new ArrayList<>();
 
@@ -175,6 +200,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        // Always call the superclass so it can restore the view hierarchy
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // Restore state members from saved instance
+        isTrueActive = savedInstanceState.getBoolean(BUTTON_TRUE_IS_ACTIVE);
+        isFalseActive = savedInstanceState.getBoolean(BUTTON_FALSE_IS_ACTIVE);
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
+
+        savedInstanceState.putBoolean(BUTTON_TRUE_IS_ACTIVE, isTrueActive);
+        savedInstanceState.putBoolean(BUTTON_FALSE_IS_ACTIVE, isFalseActive);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -188,10 +231,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void onAccuracyChanged(Sensor sensor, int accuracy){
-
     }
 
     public boolean isStoragePermissionGranted() {
+
         String TAG = "Storage Permission";
         if (Build.VERSION.SDK_INT >= 23) {
             if (this.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)

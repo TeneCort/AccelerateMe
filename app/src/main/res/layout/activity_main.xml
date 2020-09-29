@@ -17,13 +17,24 @@
         android:text="Graneetles"/>
 
     <Button
-        android:id="@+id/activity_main_btn"
+        android:id="@+id/activity_main_true_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:padding="30dp"
-        android:text="Start Reading"
+        android:text="Start reading true Fall"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"/>
+
+    <Button
+        android:id="@+id/activity_main_false_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:padding="30dp"
+        android:text="Start reading false Fall"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"/>
 
