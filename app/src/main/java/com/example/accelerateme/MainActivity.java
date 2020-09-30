@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.io.File;
@@ -49,10 +50,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView mInfoText;
     private Button mTrueButton;
     private Button mFalseButton;
+    private SeekBar mSeekBar;
 
     private boolean isTrueActive = false;
     private boolean isFalseActive = false;
     private boolean isCountDown = false;
+    private int seekBarValue =  0;
+    private int threshold = 15;
 
     float accelerationY;
     float accelerationX;
@@ -70,11 +74,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         LinearLayout mLayout = findViewById(R.id.activity_main_layout);
         mTrueButton = findViewById(R.id.activity_main_true_btn);
         mFalseButton = findViewById(R.id.activity_main_false_btn);
+        mSeekBar = findViewById(R.id.activity_main_seekbar);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
         mLayout.setKeepScreenOn(true);
+
+
+
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBarValue = mSeekBar.getProgress();
+                threshold = seekBarValue;
+                mInfoText.setText("Threshold: " + seekBarValue);
+
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,8 +190,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         accelerationY = event.values[1];
         accelerationX = event.values[0];
         accelerationZ = event.values[2];
-
-        int threshold = 15;
 
         if ((accelerationX> threshold || accelerationY > threshold || accelerationZ > threshold) && (isTrueActive || isFalseActive) && isCountDown == false){
 
