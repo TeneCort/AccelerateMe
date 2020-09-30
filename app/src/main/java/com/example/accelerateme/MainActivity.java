@@ -43,6 +43,7 @@ import static android.graphics.Color.WHITE;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     static final String BUTTON_TRUE_IS_ACTIVE = "buttonState";
     static final String BUTTON_FALSE_IS_ACTIVE = "buttonState";
+    static final String SLIDER_VALUE = "sliderValue";
 
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
@@ -232,28 +233,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Restore state members from saved instance
         isTrueActive = savedInstanceState.getBoolean(BUTTON_TRUE_IS_ACTIVE);
         isFalseActive = savedInstanceState.getBoolean(BUTTON_FALSE_IS_ACTIVE);
+        mSeekBar.setProgress(savedInstanceState.getInt(SLIDER_VALUE));
+        System.out.println("GROSSE SALOPE RESTORE");
     }
 
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
-
         savedInstanceState.putBoolean(BUTTON_TRUE_IS_ACTIVE, isTrueActive);
         savedInstanceState.putBoolean(BUTTON_FALSE_IS_ACTIVE, isFalseActive);
+        savedInstanceState.putInt(SLIDER_VALUE, mSeekBar.getProgress());
         super.onSaveInstanceState(savedInstanceState);
+        System.out.println("GROSSE SALOPE SAVE");
     }
 
-    @Override
-    protected void onResume() {
+    /*@Override
+    protected void onResume(Bundle savedInstanceState) {
         super.onResume();
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        System.out.println("GROSSE SALOPE RESUME");
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause(Bundle savedInstanceState) {
         super.onPause();
+        savedInstanceState.putBoolean(BUTTON_TRUE_IS_ACTIVE, isTrueActive);
+        savedInstanceState.putBoolean(BUTTON_FALSE_IS_ACTIVE, isFalseActive);
+        savedInstanceState.putInt(SLIDER_VALUE, mSeekBar.getProgress());
         mSensorManager.unregisterListener(this);
-    }
+        System.out.println("GROSSE SALOPE PAUSE");
+    }*/
 
     public void onAccuracyChanged(Sensor sensor, int accuracy){
     }
